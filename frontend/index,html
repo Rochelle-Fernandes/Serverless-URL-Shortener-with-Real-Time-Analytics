@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnapURL — Smart URL Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a26;
+      --border: #2a2a3d;
+      --accent: #00e5ff;
+      --accent2: #7c3aed;
+      --accent3: #f59e0b;
+      --text: #e8e8f0;
+      --muted: #6b6b8a;
+      --success: #10b981;
+      --error: #ef4444;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-orb {
+      position: fixed;
+      bottom: -150px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .header-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 36px;
+      width: fit-content;
+    }
+
+    .tab {
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+
+    .tab.active {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* Panel */
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* Form elements */
+    .input-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+    }
+
+    input::placeholder { color: var(--muted); }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0099bb);
+      color: #0a0a0f;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,229,255,0.25);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Result box */
+    .result-box {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-box.show { display: block; }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .result-url {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--text);
+      word-break: break-all;
+      margin-bottom: 16px;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-small:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .qr-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .qr-section img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+    }
+
+    /* Analytics */
+    .url-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .url-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .url-item:hover { border-color: var(--accent); }
+
+    .url-item-left { flex: 1; min-width: 0; }
+
+    .url-code {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .url-original {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: var(--font-mono);
+    }
+
+    .url-item-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .click-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      text-align: center;
+    }
+
+    .click-count {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent3);
+      line-height: 1;
+    }
+
+    .click-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .expiry-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .expiry-tag.expired {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .expiry-tag.active {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* Status messages */
+    .status-msg {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      margin-top: 12px;
+      display: none;
+    }
+
+    .status-msg.show { display: block; }
+    .status-msg.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--error); }
+    .status-msg.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--success); }
+    .status-msg.loading { background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--muted);
+    }
+
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Config notice */
+    .config-notice {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent3);
+      margin-bottom: 24px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      .input-row { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr; }
+      .url-item { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb"></div>
+
+  <div class="container">
+    <header>
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-icon">🔗</div>
+          <div class="logo-text">Snap<span>URL</span></div>
+        </div>
+        <div class="header-badge">AWS Serverless Platform</div>
+      </div>
+    </header>
+
+    <!-- Config Notice -->
+    <div class="config-notice" id="configNotice">
+      ⚙️ Update <strong>API_BASE_URL</strong> in this file with your API Gateway Invoke URL before use.
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('shorten')">Shorten URL</button>
+      <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+    </div>
+
+    <!-- Shorten Panel -->
+    <div class="panel active" id="panel-shorten">
+      <div class="card">
+        <div class="card-title">Create Short Link</div>
+
+        <div class="input-group">
+          <label>Destination URL</label>
+          <input type="url" id="longUrl" placeholder="https://example.com/your/long/url/here" />
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Custom Code (optional)</label>
+            <input type="text" id="customCode" placeholder="my-link" maxlength="20" />
+          </div>
+          <div class="input-group">
+            <label>Expires After (days)</label>
+            <input type="number" id="expiryDays" value="30" min="1" max="365" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="shortenBtn" onclick="shortenUrl()">
+          ⚡ Generate Short URL
+        </button>
+
+        <div class="status-msg" id="shortenStatus"></div>
+
+        <!-- Result -->
+        <div class="result-box" id="resultBox">
+          <div class="result-label">✅ Your Short URL</div>
+          <div class="result-url" id="resultUrl"></div>
+          <div class="result-actions">
+            <button class="btn-small" onclick="copyUrl()">📋 Copy URL</button>
+            <button class="btn-small" onclick="openUrl()">🌐 Open Link</button>
+          </div>
+          <div class="qr-section" id="qrSection" style="display:none;">
+            <div class="result-label" style="margin-bottom:10px;">QR Code</div>
+            <img id="qrImage" src="" alt="QR Code" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Panel -->
+    <div class="panel" id="panel-analytics">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="totalLinks">—</div>
+          <div class="stat-label">Total Links</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalClicks">—</div>
+          <div class="stat-label">Total Clicks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeLinks">—</div>
+          <div class="stat-label">Active Links</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">All Short Links</div>
+        <div class="status-msg" id="analyticsStatus"></div>
+        <div class="url-list" id="urlList">
+          <div class="empty-state">
+            <div class="icon">📊</div>
+            <p>Click "Load Analytics" to fetch your links</p>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="loadAnalytics()">
+          🔄 Load Analytics
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ============================================================
+    // 🔧 CONFIGURATION — Update this with your API Gateway URL
+    // ============================================================
+    const API_BASE_URL = 'https://3k61yfb6q9.execute-api.us-east-1.amazonaws.com/prod';
+    // Example: 'https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod'
+    // ============================================================
+
+    let currentShortUrl = '';
+    let currentQrUrl = '';
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('panel-' + tab).classList.add('active');
+    }
+
+    function showStatus(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = `status-msg show ${type}`;
+    }
+
+    function hideStatus(id) {
+      document.getElementById(id).className = 'status-msg';
+    }
+
+    async function shortenUrl() {
+      const longUrl = document.getElementById('longUrl').value.trim();
+      const customCode = document.getElementById('customCode').value.trim();
+      const expiryDays = parseInt(document.getElementById('expiryDays').value) || 30;
+
+      if (!longUrl) {
+        showStatus('shortenStatus', '⚠️ Please enter a URL', 'error');
+        return;
+      }
+
+      if (API_BASE_URL === 'YOUR_API_GATEWAY_INVOKE_URL') {
+        showStatus('shortenStatus', '⚠️ Please update API_BASE_URL in the script section first!', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('shortenBtn');
+      btn.disabled = true;
+      showStatus('shortenStatus', '⏳ Generating short URL...', 'loading');
+      document.getElementById('resultBox').classList.remove('show');
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/shorten`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: longUrl, customCode, expiryDays })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Something went wrong');
+        }
+
+        currentShortUrl = data.shortUrl;
+        currentQrUrl = data.qrCodeUrl;
+
+        document.getElementById('resultUrl').textContent = data.shortUrl;
+        document.getElementById('resultBox').classList.add('show');
+
+        if (data.qrCodeUrl) {
+          document.getElementById('qrImage').src = data.qrCodeUrl;
+          document.getElementById('qrSection').style.display = 'block';
+        }
+
+        showStatus('shortenStatus', `✅ Short URL created! Expires in ${expiryDays} days.`, 'success');
+
+      } catch (err) {
+        showStatus('shortenStatus', `❌ Error: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function copyUrl() {
+      navigator.clipboard.writeText(currentShortUrl).then(() => {
+        showStatus('shortenStatus', '📋 Copied to clipboard!', 'success');
+      });
+    }
+
+    function openUrl() {
+      if (currentShortUrl) window.open(currentShortUrl, '_blank');
+    }
+
+    async function loadAnalytics() {
+      if (API_BASE_URL === 'YOUR_API_GATEWAY_INVOKE_URL') {
+        showStatus('analyticsStatus', '⚠️ Please update API_BASE_URL first!', 'error');
+        return;
+      }
+
+      showStatus('analyticsStatus', '⏳ Loading analytics...', 'loading');
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/analytics`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Failed to load');
+
+        const urls = data.urls || [];
+        const now = Math.floor(Date.now() / 1000);
+
+        // Update stats
+        const totalClicks = urls.reduce((sum, u) => sum + (parseInt(u.clickCount) || 0), 0);
+        const activeCount = urls.filter(u => parseInt(u.expiresAt) > now).length;
+
+        document.getElementById('totalLinks').textContent = urls.length;
+        document.getElementById('totalClicks').textContent = totalClicks;
+        document.getElementById('activeLinks').textContent = activeCount;
+
+        // Render list
+        const listEl = document.getElementById('urlList');
+
+        if (urls.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">🔗</div>
+              <p>No links created yet. Go shorten something!</p>
+            </div>`;
+          hideStatus('analyticsStatus');
+          return;
+        }
+
+        listEl.innerHTML = urls.map(u => {
+          const isExpired = parseInt(u.expiresAt) < now;
+          const expiryDate = new Date(parseInt(u.expiresAt) * 1000).toLocaleDateString();
+          return `
+            <div class="url-item">
+              <div class="url-item-left">
+                <div class="url-code">/${u.shortCode}</div>
+                <div class="url-original">${u.originalUrl}</div>
+              </div>
+              <div class="url-item-right">
+                <div class="click-badge">
+                  <div class="click-count">${u.clickCount || 0}</div>
+                  <div class="click-label">clicks</div>
+                </div>
+                <div class="expiry-tag ${isExpired ? 'expired' : 'active'}">
+                  ${isExpired ? '⛔ expired' : '✅ ' + expiryDate}
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+
+        hideStatus('analyticsStatus');
+
+      } catch (err) {
+        showStatus('analyticsStatus', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Hide config notice if API URL is set
+    if (API_BASE_URL !== 'YOUR_API_GATEWAY_INVOKE_URL') {
+      document.getElementById('configNotice').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
