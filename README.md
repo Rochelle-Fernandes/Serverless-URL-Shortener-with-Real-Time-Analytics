@@ -1,4 +1,4 @@
-# 🔗 SnapURL — Smart URL Management & Analytics Platform
+# 🔗 Serverless-URL-Shortener-with-Real-Time-Analytics
 
 ![AWS](https://img.shields.io/badge/AWS-Serverless-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -28,7 +28,7 @@
 
 ## 📖 Overview
 
-SnapURL is a cloud-native URL shortening platform built using AWS serverless architecture. Users can shorten long URLs, set expiry durations, and track real-time click analytics — all through a clean, responsive web dashboard served over HTTPS via CloudFront.
+Serverless-URL-Shortener-with-Real-Time-Analytics is a cloud-native URL shortening platform built using AWS serverless architecture. Users can shorten long URLs, set expiry durations, and track real-time click analytics — all through a clean, responsive web dashboard served over HTTPS via CloudFront.
 
 The entire system runs without a single server, scaling automatically and operating within the AWS Free Tier.
 
@@ -94,7 +94,7 @@ DynamoDB Tables              CloudWatch Logs
 ## 📸 Screenshots
 
 ### Dashboard — Shorten URL
-![Shorten URL](screenshots/shortnerpng.png)
+![Shorten URL](screenshots/shortner.png)
 
 ### Analytics Tab
 ![Analytics](screenshots/analytics.png)
@@ -182,7 +182,7 @@ POST /shorten
 ## 📁 Project Structure
 
 ```
-snapurl/
+Serverless-URL-Shortener-with-Real-Time-Analytics/
 │
 ├── README.md
 │
@@ -195,43 +195,19 @@ snapurl/
 │   └── index.html
 │
 ├── screenshots/
-│   ├── shortnerpng.png
-│   ├── analytics.png
-│   ├── dashboard.png
-│   ├── lambda.png
-│   ├── API_gateway.png
-│   ├── dynamodb-url-shortner.png
-│   ├── dynamodb-url-analytics.png
-│   ├── S3.png
-│   ├── cloudwatch.png
-│   ├── billing_alert.png
-│   ├── IAM_Roles.png
-│   └── IAM_Users.png
-│
-└── docs/
-    └── project_report.pdf
+   ├── shortnerpng.png
+   ├── analytics.png
+   ├── dashboard.png
+   ├── lambda.png
+   ├── API_gateway.png
+   ├── dynamodb-url-shortner.png
+   ├── dynamodb-url-analytics.png
+   ├── S3.png
+   ├── cloudwatch.png
+   ├── billing_alert.png
+   ├── IAM_Roles.png
+   └── IAM_Users.png
+
 ```
-
----
-
-## 👥 Team
-
-| Roll No | Name |
-|---|---|
-| 10245 | *(Your Name)* |
-| 10247 | *(Teammate 2)* |
-| 10251 | *(Teammate 3)* |
-
-**Institution:** Fr. Conceicao Rodrigues College of Engineering, Mumbai
-**Department:** Computer Engineering
-**Course:** Cloud Computing Lab — 2025-26
-
----
-
-## 📄 Documentation
-
-[📄 View Full Project Report](docs/project_report.pdf)
-
----
 
 > Built with ❤️ on AWS Free Tier
